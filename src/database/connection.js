@@ -1,47 +1,50 @@
-import path from "path";
 import sqlite3 from "sqlite3";
+import "dotenv/config";
 
 const sqlite = sqlite3.verbose();
-
-const dbPath = process.env.NODE_ENV === "production" ?
-    "/database/data.db" : path.resolve(__dirname, "database", "data.db");
+const dbPath = process.env.DB_PATH;
 
 let db;
 
 export function connect() {
     if (db) return db;
+    
+    db = new sqlite.Database(dbPath,(err)=>{
+        if(err) console.error(err.message);
+    });
 
-    db.run(`
-        CREATE TABLE IF NOT EXISTS roles (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL
-        )    
-    `);
+    db.serialize(() => {
+        db.run("PRAGMA foreign_keys = ON");
 
-    db.run(`
-        INSERT INTO roles VALUES     
-    `);
+        db.run(`
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                last_name TEXT NOT NULL,
+                email TEXT NOT NULL UNIQUE,
+                password TEXT NOT NULL,
+                role TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'active',
+                tokens INTEGER DEFAULT 10
+            )`
+        );
 
-    db.run(`
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            email TEXT NOT NULL UNIQUE,
-            password TEXT NOT NULL,
-            role INTEGER NOT NULL,
-            FOREIGN KEY (role) REFERENCES roles (id)
-        )`
-    );
-
-    db.run(`
-        CREATE TABLE IF NOT EXISTS archives (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            path TEXT NOT NULL,
-            id_user INTEGER NOT NULL,
-            FOREIGN KEY (id_user) REFERENCES users(id)
-        )
-    `);
+        db.run(`
+            CREATE TABLE IF NOT EXISTS archives (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL UNIQUE,
+                original_name TEXT NOT NULL,
+                size INTEGER NOT NULL,
+                path TEXT NOT NULL,
+                user_id INTEGER NOT NULL,
+                upload_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            )`
+        );
+    })
+    return db;
 }
+
 export function run(sql, params = []) {
     const database = connect();
     return new Promise((resolve, reject) => {
@@ -70,5 +73,3 @@ export function all(sql, params = []) {
         });
     });
 }
-
-
