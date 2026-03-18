@@ -1,9 +1,10 @@
 import validator from "validator";
 import bcrypt from "bcryptjs";
-import db from "../database/connection.js";
+import * as db from "../database/connection.js";
 import "dotenv/config"
 
-export class Login {
+
+export default class Login {
     constructor(body) {
         this.body = body;
         this.errors = [];
@@ -11,7 +12,7 @@ export class Login {
     }
 
     async login() {
-        this.valida()
+        this.validaLogin()
         if (this.errors.length > 0) return;
 
         const user = await db.get(
@@ -27,6 +28,10 @@ export class Login {
             return this.errors.push("Senha invalida");
         }
 
+        if (user.status === "banned") {
+            return this.errors.push("Usuario banido");
+        }
+
         this.user = {
             id: user.id,
             email: user.email,
@@ -37,7 +42,7 @@ export class Login {
     }
 
     async register() {
-        this.valida();
+        this.validaRegister();
         if (this.errors.length > 0) return;
 
         await this.userExists();
@@ -46,7 +51,7 @@ export class Login {
         try {
             const salt = await bcrypt.genSalt(12);
             const hash = await bcrypt.hash(this.body.password, salt);
-            const role = this.body.acessKey === process.env.ADMIN_KEY ? "admin" : "user"
+            const role = this.body.accessKey === process.env.ADMIN_KEY ? "admin" : "user"
 
             const result = await db.run(
                 `INSERT INTO users (name, last_name, email, password, role)
@@ -54,7 +59,7 @@ export class Login {
                 [this.body.name, this.body.last_name, this.body.email, hash, role]
             )
             this.user = {
-                id: result.id,
+                id: result.lastID,
                 email: this.body.email
             }
         } catch (e) {
@@ -65,7 +70,7 @@ export class Login {
 
     async userExists() {
         const user = await db.get(
-            `SELECT id, email, password
+            `SELECT id
              FROM users
              WHERE email = ?`,
             [this.body.email]
@@ -73,7 +78,19 @@ export class Login {
         if (user) this.errors.push("E-mail ja cadastrado");
     }
 
-    valida() {
+    validaLogin() {
+        this.cleanUp();
+
+        if (!this.body.email || !validator.isEmail(this.body.email)) {
+            this.errors.push("Email invalido");
+        }
+
+        if (!this.body.password) {
+            this.errors.push("Digite uma senha");
+        }
+    }
+
+    validaRegister() {
         this.cleanUp();
 
         if (!this.body.email || !validator.isEmail(this.body.email)) {
@@ -102,7 +119,7 @@ export class Login {
         this.body = {
             name: this.body.name || "",
             last_name: this.body.last_name || "",
-            email: this.body.email || "",
+            email: this.body.email.toLowerCase() || "",
             password: this.body.password || "",
             password2: this.body.password2 || "",
             acessKey: this.body.acessKey || ""

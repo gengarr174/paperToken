@@ -1,6 +1,7 @@
-import express from "express";
-import upload from "./src/middlewares/upload.js";
+import app from "./app.js";
 
-const app = express();
+const PORT = process.env.PORT || 3000;
 
-app.listen(process.env.PORT);
+app.listen(PORT, () => {
+    console.log(`Servidor rodando em http://localhost:${PORT}`);
+});

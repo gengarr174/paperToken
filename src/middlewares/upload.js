@@ -35,8 +35,10 @@ function fileFilter(req,file,cb){
     }
 }
 
-export const upload = multer({
+const upload = multer({
     storage,
     limits, 
     fileFilter
 });
+
+export default upload

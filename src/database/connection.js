@@ -6,7 +6,7 @@ const dbPath = process.env.DB_PATH;
 
 let db;
 
-export function connect() {
+function connect() {
     if (db) return db;
     
     db = new sqlite.Database(dbPath,(err)=>{
@@ -23,8 +23,8 @@ export function connect() {
                 last_name TEXT NOT NULL,
                 email TEXT NOT NULL UNIQUE,
                 password TEXT NOT NULL,
-                role TEXT NOT NULL,
-                status TEXT NOT NULL DEFAULT 'active',
+                role TEXT CHECK(role IN ('admin','user')) NOT NULL,
+                status TEXT CHECK(status IN ('active','banned')) DEFAULT 'active',
                 tokens INTEGER DEFAULT 10
             )`
         );
@@ -38,7 +38,7 @@ export function connect() {
                 path TEXT NOT NULL,
                 user_id INTEGER NOT NULL,
                 upload_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users(id)
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
             )`
         );
     })

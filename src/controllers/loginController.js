@@ -1,10 +1,10 @@
 import Login from "../models/LoginModel.js"
 
 export const index = (req,res) =>{
-    if(req.session.user){
-        return res.render('login-logado');
+    if(req.session?.user){
+        return res.render("home");
     }
-    return res.render('login');
+    return res.render("login");
 }
 
 export const register = async function (req,res){
@@ -13,16 +13,16 @@ export const register = async function (req,res){
         await register.register();
 
         if(register.errors.length > 0){
-            req.flash('errors',register.errors);
+            req.flash("errors",register.errors);
             return req.session.save(()=>
-            res.redirect('/login/index'));
+            res.redirect("/auth"));
         }
 
-        req.flash ('sucess', 'Usuário cadastrado com sucesso!');
-        return req.session.save(()=> res.redirect('/login/index'));
+        req.flash ("success", "Usuário cadastrado com sucesso!");
+        return req.session.save(()=> res.redirect("/home"));
     }catch(e){
         console.error(e)
-        return res.render('404');
+        return res.render("404");
     }
 }
 
@@ -32,27 +32,29 @@ export const login = async function (req,res){
         await login.login();
 
         if(login.errors.length > 0){
-            req.flash('errors',login.errors);
-            return req.session.save(()=> res.redirect('/login/index'));
+            req.flash("errors",login.errors);
+            return req.session.save(()=> res.redirect("/auth"));
         }
 
         req.session.regenerate(err=>{
             if(err){
                 console.log(err);
-                return res.render('404');
+                return res.render("404");
             }
 
             req.session.user = {
                 id: login.user.id,
-                email: login.user.email
+                email: login.user.email,
+                role: login.user.role,
+                tokens: login.user.tokens
             }
 
-            req.flash('sucess','Login realizado com sucesso');
-            return req.session.save(()=>res.redirect('login/index'));
+            req.flash("sucess","Login realizado com sucesso");
+            return req.session.save(()=>res.redirect("/home"));
         })
     }catch(e){
         console.error(e);
-        return res.render('404');
+        return res.render("404");
     }
 }
 
@@ -60,10 +62,10 @@ export const logout = function (req,res){
     req.session.destroy(err=>{
         if(err){
             console.error(err);
-            return res.render('404');
+            return res.render("404");
         }
 
-        res.clearCookie('connect.sid');
-        return res.redirect('/');
+        res.clearCookie("connect.sid");
+        return res.redirect("/auth");
     })
 }
