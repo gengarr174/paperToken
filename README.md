@@ -1,4 +1,4 @@
-# sup☁️ Paper Token API
+# ☁️ Paper Token API
 
 Paper Token é uma API desenvolvida em JavaScript utilizando Node.js, Express e SQLite que simula o funcionamento de um serviço de armazenamento em nuvem.
 
