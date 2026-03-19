@@ -7,6 +7,7 @@ import {loginRequired} from "./middlewares/middleware.js";
 
 const router = express.Router();
 
+router.get("/",loginController.index);
 router.get("/auth",loginController.index);
 router.post("/auth/login",loginController.login);
 router.post("/auth/register",loginController.register);
