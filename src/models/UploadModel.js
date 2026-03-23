@@ -1,46 +1,52 @@
 import * as db from "../database/connection.js";
 
-export default class Upload{
-    constructor(file,session){
+export default class Upload {
+    constructor(file, session) {
         this.file = file;
         this.session = session
         this.errors = [];
     }
-    async upload(){
+    async upload() {
 
         this.valida();
-        
-        if(this.errors.length> 0) return;
 
-        await db.run(
-            `INSERT INTO archives (name,original_name,size,path,user_id)
+        if (this.errors.length > 0) return;
+        try {
+            await db.run(
+                `INSERT INTO archives (name,original_name,size,path,user_id)
             VALUES (?,?,?,?,?)`,
-            [this.file.filename,
-             this.file.originalname,
-             this.file.size,
-             this.file.path,
-             this.session.userId]
-        );
+                [this.file.filename,
+                this.file.originalname,
+                this.file.size,
+                this.file.path,
+                this.session.user.id]
+            );
+        } catch (e) {
+            throw e;
+        }
     }
 
-    valida(){
-        if(!this.file){
-            this.errors.push("Nenhum arquivo enviado")
+    valida() {
+        if (!this.file) {
+            return this.errors.push("Nenhum arquivo enviado");
         }
-        if(!this.file.filename){
-            this.errors.push("Erro ao gerar nome do arquivo");
+        if (!this.file.filename) {
+            return this.errors.push("Erro ao gerar nome do arquivo");
         }
-        if(!this.file.originalName){
-            this.errors.push("Arquivo sem nome");
+        if (!this.file.originalname) {
+            return this.errors.push("Arquivo sem nome");
         }
-        if(this.file.size > (5*1024*1024)){
-            this.errors.push("Tamanho de arquivo superior a 5MB");
+        if (this.file.size > (5 * 1024 * 1024)) {
+            return this.errors.push("Tamanho de arquivo superior a 5MB");
         }
-        if(!this.file.path){
-            this.errors.push("Pasta destino não encontrada");
+        if (this.file.size === 0) {
+            this.errors.push("Arquivo vazio não permitido");
         }
-        if(!this.session?.user?.id){
-            this.errors.push("Usuário não autenticado");
+        if (!this.file.path) {
+            return this.errors.push("Pasta destino não encontrada");
+        }
+        if (!this.session?.user?.id) {
+            return this.errors.push("Usuário não autenticado");
         }
     }
 }

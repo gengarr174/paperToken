@@ -1,17 +1,15 @@
 import Home from "../models/HomeModel.js";
 
 export const index = async (req,res) =>{
+    if (!req.session?.user) return res.redirect("/auth");
     try{
-        if(!req.session?.user) return res.redirect("/auth");
-
         if(req.session.user.role === "admin"){
             const users = await Home.allUsers();
             return res.render("home_admin",{users});
         }
-
         const files = await Home.allFiles(req.session.user.id);
-        return res.render("home_user",{files});
-
+        const filesCount = await Home.countFiles(req.session.user.id);
+        return res.render("home_user",{files,filesCount});
     }catch(e){
         console.error(e);
         return res.status(500).send("Erro ao carregar dados");
@@ -19,51 +17,74 @@ export const index = async (req,res) =>{
 };
 
 export const del = async (req,res)=>{
+    if (!req.session?.user) return res.redirect("/auth");
     try{
         if(req.session.user.role === "admin"){
             const user = await Home.deleteUser(req.body.idUser);
-
-            if(!user) return res.status(404).send("Usuário nao encontrado");
-            
+            if(!user){
+                req.flash("errors", "Usuário não encontrado");
+                return res.redirect("/home");
+            }
             return res.redirect("/home");
         }
-
         const file = await Home.deleteFile(req.body.idFile, req.session.user.id);
-
-        if(!file) return res.status(404).send("Arquivo nao encontrado");
-
+        if(!file){
+            req.flash("errors", "Usuário não encontrado");
+            return res.redirect("/home");
+        }
         return res.redirect("/home");
-
     }catch(e){
         console.error(e);
         return res.status(500).send("Erro ao deletar");
     }
 };
 
-export const edit = async (req,res)=>{
+export const download = async(req,res) => {
+    if (!req.session?.user) return res.redirect("/auth");
     try{
+        if(req.session.user.role === "admin") return res.redirect("/home");
+        const fileID = parseInt(req.params.id,10);
 
+        if (isNaN(fileID)) return res.status(400).send("ID inválido");
+
+        const filePath = await Home.downloadFile(req.params.id,req.session.user.id);
+        if(!filePath) {
+            req.flash("errors", "Arquivo não encontrado");
+            return res.redirect("/home");
+        }
+        return res.download(filePath);
+    }catch(e){
+        console.error(e);
+        return res.status(500).send("Erro ao baixar");
+    }
+}
+
+export const edit = async (req,res)=>{
+    if (!req.session?.user) return res.redirect("/auth");
+    try{
         if(req.session.user.role === "admin"){
-
             const edit = await Home.changeStatusUser(
-                req.body.idUser,req.body.statusUser
+                req.body.idUser,
+                req.body.statusUser
             );
 
-            if(!edit) return res.status(404).send("Alteracao falhou");
+            if(!edit) {
+                req.flash("errors", "Alteração falhou");
+                return res.redirect("/home");
+            }
 
             return res.redirect("/home");
         }
-
         const edit = await Home.editFile(
             req.body.idFile,
-            req.body.session.user.id,
+            req.session.user.id,
             req.body.original_name 
         );
-
-        if(!edit) return res.status(404).send("Edicao falhou");
-
+        if(!edit) {
+            req.flash("errors", "Edição falhou");
+            return res.redirect("/home");
+        }
         return res.redirect("/home");
-
     }catch(e){
         console.error(e);
         return res.status(500).send("Erro ao editar");

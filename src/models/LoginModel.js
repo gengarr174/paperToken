@@ -12,32 +12,39 @@ export default class Login {
     }
 
     async login() {
-        this.validaLogin()
-        if (this.errors.length > 0) return;
+        this.validaLogin();
+        try {
+            if (this.errors.length > 0) return;
 
-        const user = await db.get(
-            `SELECT id, email, password, status, role, tokens
+            const user = await db.get(
+                `SELECT id, name, last_name, email, password, status, role, tokens
              FROM users
              WHERE email = ?`,
-            [this.body.email]
-        );
+                [this.body.email]
+            );
 
-        if (!user) return this.errors.push("Usuario nao encontrado");
+            if (!user) return this.errors.push("Usuario nao encontrado");
 
-        if (!(await bcrypt.compare(this.body.password, user.password))) {
-            return this.errors.push("Senha invalida");
-        }
+            if (user.status === "banned") {
+                return this.errors.push("Usuario banido");
+            }
 
-        if (user.status === "banned") {
-            return this.errors.push("Usuario banido");
-        }
+            if (!(await bcrypt.compare(this.body.password, user.password))) {
+                return this.errors.push("E-mail ou senha invalida");
+            }
 
-        this.user = {
-            id: user.id,
-            email: user.email,
-            status: user.status,
-            role: user.role,
-            tokens: user.tokens
+            this.user = {
+                id: user.id,
+                name: user.name,
+                last_name: user.last_name,
+                email: user.email,
+                status: user.status,
+                role: user.role,
+                tokens: user.tokens
+            }
+        } catch (e) {
+            this.errors.push(e);
+            throw e;
         }
     }
 
@@ -51,7 +58,7 @@ export default class Login {
         try {
             const salt = await bcrypt.genSalt(12);
             const hash = await bcrypt.hash(this.body.password, salt);
-            const role = this.body.accessKey === process.env.ADMIN_KEY ? "admin" : "user"
+            const role = this.body.accessKey !== process.env.ADMIN_KEY ? "user" : "admin";
 
             const result = await db.run(
                 `INSERT INTO users (name, last_name, email, password, role)
@@ -93,6 +100,14 @@ export default class Login {
     validaRegister() {
         this.cleanUp();
 
+        if (!this.body.name || this.body.name.length < 2) {
+            this.errors.push("Nome inválido");
+        }
+
+        if (!this.body.last_name || this.body.last_name.length < 2) {
+            this.errors.push("Sobrenome inválido");
+        }
+
         if (!this.body.email || !validator.isEmail(this.body.email)) {
             this.errors.push("E-mail invalido");
         }
@@ -105,7 +120,7 @@ export default class Login {
             this.errors.push("Senha deve ter entre 6 e 50 caracteres.")
         }
 
-        if (!(this.body.password === this.body.password2)) {
+        if (this.body.password !== this.body.password2) {
             this.errors.push("As senhas devem ser iguais");
         }
     }
@@ -119,10 +134,10 @@ export default class Login {
         this.body = {
             name: this.body.name || "",
             last_name: this.body.last_name || "",
-            email: this.body.email.toLowerCase() || "",
+            email: (this.body.email || "").toLowerCase(),
             password: this.body.password || "",
             password2: this.body.password2 || "",
-            acessKey: this.body.acessKey || ""
+            accessKey: this.body.accessKey || ""
         }
     }
 }

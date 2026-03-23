@@ -7,10 +7,12 @@ const dbPath = process.env.DB_PATH;
 let db;
 
 function connect() {
+    if (!dbPath) throw new Error("DB_PATH não definido no .env");
+
     if (db) return db;
     
     db = new sqlite.Database(dbPath,(err)=>{
-        if(err) console.error(err.message);
+        if(err) throw new Error(err.message);
     });
 
     db.serialize(() => {
@@ -25,7 +27,7 @@ function connect() {
                 password TEXT NOT NULL,
                 role TEXT CHECK(role IN ('admin','user')) NOT NULL,
                 status TEXT CHECK(status IN ('active','banned')) DEFAULT 'active',
-                tokens INTEGER DEFAULT 10
+                tokens INTEGER DEFAULT 10 CHECK(tokens>=0)
             )`
         );
 
@@ -35,6 +37,7 @@ function connect() {
                 name TEXT NOT NULL UNIQUE,
                 original_name TEXT NOT NULL,
                 size INTEGER NOT NULL,
+                type TEXT NOT NULL,
                 path TEXT NOT NULL,
                 user_id INTEGER NOT NULL,
                 upload_date DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -50,7 +53,7 @@ export function run(sql, params = []) {
     return new Promise((resolve, reject) => {
         database.run(sql, params, function (err) {
             if (err) return reject(err);
-            resolve({ id: this.lastID, changes: this.changes });
+            resolve({ lastID: this.lastID, changes: this.changes });
         });
     });
 }

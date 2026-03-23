@@ -1,5 +1,9 @@
 import multer from "multer";
 import crypto from "crypto";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 function hash256(name){
     return crypto.createHash("sha256").update(name).digest('hex');
@@ -7,7 +11,7 @@ function hash256(name){
 
 const storage = multer.diskStorage({
     destination: (req,file,cb)=>{
-        cb(null,"uploads/");
+        cb(null,path.resolve(__dirname,"..","uploads"));
     },
     filename: (req,file,cb) =>{
         const ext = file.originalname.split(".").pop();
@@ -17,13 +21,13 @@ const storage = multer.diskStorage({
 })
 
 const limits = {
-    fileSize: 5 * 1024 * 1024
+    fileSize: 5 * 1024 * 1024,
+    files: 1
 }
 
 function fileFilter(req,file,cb){
     const allowedMimeTypes = [
         "image/png",
-        "image/jpg",
         "image/jpeg",
         "text/plain"
     ];
