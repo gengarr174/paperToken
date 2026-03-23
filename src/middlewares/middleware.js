@@ -20,7 +20,7 @@ export const csrfMidWare = (req,res,next)=>{
 }
 
 export const checkCsrfErr = (err,req,res,next)=>{
-    if(err && err.code ==="EBADCSRFTOKEN"){
+    if(err && (err.code === "EBADCSRFTOKEN" || err.message=== "invalid csrf token")){
         return res.status(403).render("404");
     }
     next(err);
