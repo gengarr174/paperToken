@@ -150,11 +150,14 @@ Crie um arquivo `.env` na raiz do projeto:
 PORT=3000
 SESSION_SECRET=sua_chave_secreta_aqui
 ADMIN_KEY=chave_para_registro_admin
-DB_PATH=./database/papertoken.sqlite
-NODE_ENV=development
+DB_PATH=./database/data.db
 ```
 
-**4. Inicie o servidor**
+**4. Cria a pasta de uploads**
+
+Crie a pasta `./uploads` na raiz do projeto
+
+**5. Inicie o servidor**
 ```bash
 node server.js
 ```
