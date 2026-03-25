@@ -3,16 +3,20 @@ import Home from "../models/HomeModel.js";
 export const index = async (req,res) =>{
     if (!req.session?.user) return res.redirect("/auth");
     try{
+        const csrfToken = req.csrfToken();
         if(req.session.user.role === "admin"){
             const users = await Home.allUsers();
-            return res.render("home_admin",{users});
+            return res.render("home_admin",{users,csrfToken,
+                   user: req.session.user});
         }
         const files = await Home.allFiles(req.session.user.id);
         const filesCount = await Home.countFiles(req.session.user.id);
-        return res.render("home_user",{files,filesCount});
+        console.log(files);
+        return res.render("home_user",{files,filesCount,csrfToken,
+               user: req.session.user});
     }catch(e){
         console.error(e);
-        return res.status(500).send("Erro ao carregar dados");
+        return res.status(500).render("500");
     }
 };
 
@@ -35,7 +39,7 @@ export const del = async (req,res)=>{
         return res.redirect("/home");
     }catch(e){
         console.error(e);
-        return res.status(500).send("Erro ao deletar");
+        return res.status(500).render("500");
     }
 };
 
@@ -55,7 +59,7 @@ export const download = async(req,res) => {
         return res.download(filePath);
     }catch(e){
         console.error(e);
-        return res.status(500).send("Erro ao baixar");
+        return res.status(500).render("500");
     }
 }
 
@@ -87,6 +91,6 @@ export const edit = async (req,res)=>{
         return res.redirect("/home");
     }catch(e){
         console.error(e);
-        return res.status(500).send("Erro ao editar");
+        return res.status(500).render("500");
     }
 };

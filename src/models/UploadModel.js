@@ -7,21 +7,43 @@ export default class Upload {
         this.errors = [];
     }
     async upload() {
-
         this.valida();
-
-        if (this.errors.length > 0) return;
+        if (this.errors.length > 0) return null;
+        let status = false; 
         try {
-            await db.run(
-                `INSERT INTO archives (name,original_name,size,path,user_id)
-            VALUES (?,?,?,?,?)`,
-                [this.file.filename,
-                this.file.originalname,
-                this.file.size,
-                this.file.path,
-                this.session.user.id]
+            const user = await db.get(
+                `SELECT tokens FROM users WHERE id = ?`,
+                [this.session.user.id]
             );
+
+            if (!user || user.tokens <= 0) {
+                throw new Error("Sem tokens disponíveis");
+            }
+            await db.run("BEGIN TRANSACTION");
+            status = true;
+            await db.run(
+                `INSERT INTO archives (name, original_name, size, type, path, user_id)
+                VALUES (?, ?, ?, ?, ?, ?)`,
+                [
+                    this.file.filename,
+                    this.file.originalname,
+                    this.file.size,
+                    this.file.mimetype,
+                    this.file.path,
+                    this.session.user.id
+                ]
+            );
+            await db.run(
+                `UPDATE users SET tokens = tokens - 1 WHERE id = ?`,
+                [this.session.user.id]
+            );
+            await db.run("COMMIT");
+            status = false;
+            const tokens = await db.get(`SELECT tokens FROM users WHERE 
+                    id = ?`,[this.session.user.id]);
+            return tokens
         } catch (e) {
+            if(status) await db.run("ROLLBACK");
             throw e;
         }
     }

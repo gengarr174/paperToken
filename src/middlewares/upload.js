@@ -11,7 +11,7 @@ function hash256(name){
 
 const storage = multer.diskStorage({
     destination: (req,file,cb)=>{
-        cb(null,path.resolve(__dirname,"..","uploads"));
+        cb(null,path.resolve(__dirname,"..","..","uploads"));
     },
     filename: (req,file,cb) =>{
         const ext = file.originalname.split(".").pop();
@@ -32,10 +32,11 @@ function fileFilter(req,file,cb){
         "text/plain"
     ];
 
-    if(allowedMimeTypes.includes(file.mimetype)){
-        cb(null,true)
-    } else {
-        cb( new Error ("Unaccepted file type. Only PNG, JPG, or TXT files are accepted."));
+    if(allowedMimeTypes.includes(file.mimetype)) cb(null,true)
+    else {
+        const err = new Error("Tipo de arquivo não permitido.");
+        err.code = "INVALID_FILE_TYPE";
+        cb(err);
     }
 }
 

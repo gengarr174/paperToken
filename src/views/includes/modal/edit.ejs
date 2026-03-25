@@ -1,0 +1,51 @@
+<% if(user.role === 'admin') { %>
+<!-- Admin: alterar status do usuário -->
+<div class="modal fade" id="mEdit" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="mEditTitle">Alterar Status</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form action="/home/edit?_method=PUT" method="POST">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
+        <div class="modal-body">
+          <input type="hidden" name="idUser" id="eid"/>
+          <input type="hidden" name="statusUser" id="estatus"/>
+          <p style="font-size:.875rem;margin:0" id="mEditMsg"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-sm" id="mEditBtn">Confirmar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<% } else { %>
+<!-- User: renomear arquivo -->
+<div class="modal fade" id="mEdit" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-pencil me-2" style="color:var(--warn)"></i>Renomear
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form action="/home/edit?_method=PUT" method="POST">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
+        <div class="modal-body">
+          <input type="hidden" name="idFile" id="eid"/>
+          <label class="form-label fw-semibold mb-1" style="font-size:.81rem">Novo nome</label>
+          <input type="text" class="form-control form-control-sm" name="original_name" id="ename"/>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-sm btn-warning text-white">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<% } %>

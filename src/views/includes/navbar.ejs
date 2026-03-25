@@ -1,0 +1,46 @@
+<% if(user.role === "admin"){%>
+<nav class="navbar navbar-expand-lg shadow-sm">
+  <div class="container-fluid px-3">
+    <a class="navbar-brand" href="#">
+      <div class="brand-dot"></div>Paper Token
+      <span class="admin-badge ms-2">Admin</span>
+    </a>
+    <div class="d-flex align-items-center gap-2 ms-auto flex-wrap">
+      <button class="nav-btn" data-bs-toggle="modal" data-bs-target="#mProfile">
+        <i class="bi bi-person"></i><span>Perfil</span>
+      </button>
+      <button class="nav-btn danger" data-bs-toggle="modal" data-bs-target="#mLogout">
+        <i class="bi bi-box-arrow-right"></i><span>Sair</span>
+      </button>
+    </div>
+  </div>
+</nav>
+<% }else{%>
+<nav class="navbar navbar-expand-lg shadow-sm">
+  <div class="container-fluid px-3">
+    <a class="navbar-brand" href="#"><div class="brand-dot"></div>Paper Token</a>
+    <div class="d-flex align-items-center gap-2 ms-auto flex-wrap">
+      <div class="coin-chip">
+        <div class="coin-display" data-bs-toggle="modal" data-bs-target="#mCoins">
+          <div class="coin-circle">₵</div>
+          <div class="coin-value"><%= user.tokens %></div>
+        </div>
+        <div class="coin-sep"></div>
+        <button class="coin-add" title="Adicionar moedas"
+          data-bs-toggle="modal" data-bs-target="#mCaptcha">
+          <i class="bi bi-plus-lg"></i>
+        </button>
+      </div>
+      <button class="nav-btn" data-bs-toggle="modal" data-bs-target="#mProfile">
+        <i class="bi bi-person"></i><span>Perfil</span>
+      </button>
+      <button class="nav-btn primary" data-bs-toggle="modal" data-bs-target="#mUpload">
+        <i class="bi bi-cloud-upload"></i><span>Enviar Arquivo</span>
+      </button>
+      <button class="nav-btn danger" data-bs-toggle="modal" data-bs-target="#mLogout">
+        <i class="bi bi-box-arrow-right"></i><span>Sair</span>
+      </button>
+    </div>
+  </div>
+</nav>
+<% } %>

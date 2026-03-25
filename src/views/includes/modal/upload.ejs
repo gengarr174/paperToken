@@ -1,0 +1,40 @@
+<!-- Visível apenas para usuários comuns -->
+<% if(user.role !== 'admin') { %>
+<div class="modal fade" id="mUpload" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-cloud-upload me-2 text-primary"></i>Enviar Arquivo
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form action="/upload/add" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
+        <div class="modal-body">
+          <div class="upload-zone" id="uz"
+               onclick="document.getElementById('fi').click()"
+               ondragover="event.preventDefault();this.classList.add('drag')"
+               ondragleave="this.classList.remove('drag')"
+               ondrop="handleDrop(event)">
+            <div class="uz-icon"><i class="bi bi-cloud-arrow-up"></i></div>
+            <p class="uz-main">Clique ou arraste o arquivo aqui</p>
+            <p class="uz-sub">PNG, JPG, JPEG ou TXT &nbsp;•&nbsp; Máx. 5 MB</p>
+          </div>
+          <input type="file" id="fi" name="file"
+                 accept=".png,.jpg,.jpeg,.txt"
+                 style="display:none"
+                 onchange="handleFile(this.files[0])"/>
+          <div id="fp" style="display:none"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-sm btn-primary">
+            <i class="bi bi-cloud-upload me-1"></i>Enviar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<% } %>

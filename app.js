@@ -3,14 +3,13 @@ import path from "path";
 import session from "express-session";
 import flash from "connect-flash";
 import helmet from "helmet";
-import csrf from "csurf";
 import connectSql from "connect-sqlite3";
 import "dotenv/config";
 import methodOverride from "method-override";
 import { fileURLToPath } from "url";
 
 import routes from "./src/routes.js";
-import { csrfMidWare, checkCsrfErr, globalMid } from "./src/middlewares/middleware.js";
+import { checkCsrfErr, globalMid } from "./src/middlewares/middleware.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -41,8 +40,6 @@ app.use(session({
 app.use(express.static(path.resolve("public")));
 app.use(flash());
 
-app.use(csrf());
-app.use(csrfMidWare);
 app.use(globalMid);
 app.use(routes);
 app.use(checkCsrfErr);

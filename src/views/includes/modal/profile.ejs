@@ -1,0 +1,95 @@
+<div class="modal fade" id="mProfile" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form action="/profile/update" method="POST">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="bi bi-person-circle me-2 text-primary"></i>Meu Perfil
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="profile-avatar mb-3">
+            <i class="bi bi-person-fill"></i>
+          </div>
+
+          <div class="mb-3">
+            <label for="profile-name" class="form-label">Nome</label>
+            <input
+              type="text"
+              class="form-control"
+              id="profile-name"
+              name="name"
+              value="<%= user.name %>"
+              required
+            >
+          </div>
+
+          <div class="mb-3">
+            <label for="profile-last-name" class="form-label">Sobrenome</label>
+            <input
+              type="text"
+              class="form-control"
+              id="profile-last-name"
+              name="last_name"
+              value="<%= user.last_name %>"
+              required
+            >
+          </div>
+
+          <div class="mb-3">
+            <label for="profile-email" class="form-label">E-mail</label>
+            <input
+              type="email"
+              class="form-control"
+              id="profile-email"
+              name="email"
+              value="<%= user.email %>"
+              required
+            >
+          </div>
+
+          <div class="p-row">
+            <span class="p-key">Função</span>
+            <span class="p-val">
+              <span class="badge bg-primary"><%= user.role %></span>
+            </span>
+          </div>
+
+          <% if(user.role !== 'admin') { %>
+          <div class="p-row mt-2">
+            <span class="p-key">Moedas</span>
+            <span class="p-val" style="color:var(--coin);font-weight:700">
+              ₵ <%= user.tokens %>
+            </span>
+          </div>
+          <% } %>
+        </div>
+
+        <div class="modal-footer d-flex justify-content-between">
+          <button
+            type="button"
+            class="btn btn-outline-warning"
+            data-bs-target="#mPassword"
+            data-bs-toggle="modal"
+            data-bs-dismiss="modal"
+          >
+            Alterar senha
+          </button>
+
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+              Fechar
+            </button>
+            <button type="submit" class="btn btn-primary">
+              Salvar alterações
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

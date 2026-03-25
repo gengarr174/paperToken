@@ -3,7 +3,7 @@ import Login from "../models/LoginModel.js"
 export const index = (req, res) => {
     if (req.session?.user)
         return res.redirect("/home");
-    return res.render("auth");
+    return res.render("auth",{csrfToken: req.csrfToken()});
 }
 
 export const register = async function (req, res) {
@@ -20,19 +20,19 @@ export const register = async function (req, res) {
                 return res.status(500).render("500");
             }
             req.session.user = {
-                id: loginModel.user.id,
-                name: loginModel.user.name,
-                last_name: loginModel.user.last_name,
-                email: loginModel.user.email,
-                role: loginModel.user.role,
-                tokens: loginModel.user.tokens
+                id: register.user.id,
+                name: register.user.name,
+                last_name: register.user.last_name,
+                email: register.user.email,
+                role: register.user.role,
+                tokens: register.user.tokens
             };
             req.flash("success", "Usuário cadastrado com sucesso!");
             return req.session.save(() => res.redirect("/home"));
         });
     } catch (e) {
         console.error(e)
-        return res.status(500).render("404");
+        return res.status(500).render("500");
     }
 }
 
@@ -66,7 +66,7 @@ export const login = async function (req, res) {
         })
     } catch (e) {
         console.error(e);
-        return res.status(500).render("404");
+        return res.status(500).render("500");
     }
 }
 

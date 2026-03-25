@@ -58,16 +58,28 @@ export default class Login {
         try {
             const salt = await bcrypt.genSalt(12);
             const hash = await bcrypt.hash(this.body.password, salt);
-            const role = this.body.accessKey !== process.env.ADMIN_KEY ? "user" : "admin";
+            const role = this.body.accessKey === process.env.ADMIN_KEY ? "admin" : "user";
 
             const result = await db.run(
                 `INSERT INTO users (name, last_name, email, password, role)
                  VALUES (?, ?, ?, ?, ?)`,
                 [this.body.name, this.body.last_name, this.body.email, hash, role]
             )
+
+            const user = await db.get(
+            `SELECT id, name, last_name, email, role, tokens 
+             FROM users WHERE id = ?`,
+            [result.lastID]
+            );
+            
             this.user = {
-                id: result.lastID,
-                email: this.body.email
+                id: user.id,
+                name: user.name,
+                last_name: user.last_name,
+                email: user.email,
+                status: user.status,
+                role: user.role,
+                tokens: user.tokens
             }
         } catch (e) {
             if (e.message.includes('UNIQUE')) return this.errors.push("E-mail ja cadastrado");

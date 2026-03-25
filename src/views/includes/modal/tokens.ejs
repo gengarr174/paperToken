@@ -1,0 +1,29 @@
+<!-- Visível apenas para usuários comuns -->
+<% if(user.role !== 'admin') { %>
+<div class="modal fade" id="mCoins" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-coin me-2" style="color:var(--coin)"></i>Carteira de Moedas
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="coin-balance">
+          <div style="font-size:2rem">🪙</div>
+          <div class="cb-big"><%= user.tokens %></div>
+          <div class="cb-lbl">moedas disponíveis</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+        <button class="btn btn-sm btn-warning text-white fw-semibold"
+          data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#mCaptcha">
+          <i class="bi bi-plus-lg me-1"></i>Adicionar Moedas
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<% } %>

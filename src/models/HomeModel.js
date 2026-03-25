@@ -23,7 +23,7 @@ class Home {
 
     static async allFiles(userID) {
         return await db.all(
-            `SELECT original_name, size, upload_date
+            `SELECT id, original_name, size, upload_date
              FROM archives
              WHERE user_id = ?
              ORDER BY upload_date DESC`,

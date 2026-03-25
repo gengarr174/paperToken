@@ -1,0 +1,130 @@
+<%- include("includes/header") %>
+<%- include("includes/navbar") %>
+</head>
+<body>
+<main>
+  <div class="page-title">Meus Arquivos</div>
+  <div class="page-sub">Gerencie os arquivos enviados e armazenados no sistema.</div>
+
+  <%- include('includes/messages') %>
+
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="sc-label">Total de Arquivos</div>
+      <div class="sc-value text-primary"><%= filesCount[0][0].total_files || 0 %></div>
+    </div>
+    <div class="stat-card">
+      <div class="sc-label">Tamanho Total</div>
+      <div class="sc-value" style="color:var(--success)">
+        <%
+          const totalBytes = filesCount[1][0].total_size || 0;
+          let sizeStr;
+          if(totalBytes >= 1048576) sizeStr = (totalBytes/1048576).toFixed(1)+' MB';
+          else if(totalBytes >= 1024) sizeStr = Math.floor(totalBytes/1024)+' KB';
+          else sizeStr = totalBytes+' B';
+        %>
+        <%= sizeStr %>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="sc-label">Último Upload</div>
+      <div class="sc-value" style="color:var(--warn);font-size:1.05rem">
+        <% const lastRaw = filesCount[2][0].last_upload; %>
+        <% if(lastRaw) { %>
+          <%= lastRaw.slice(8,10)+'/'+lastRaw.slice(5,7)+'/'+lastRaw.slice(0,4) %>
+        <% } else { %>—<% } %>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="tbl-toolbar">
+      <div class="search-wrap">
+        <i class="bi bi-search"></i>
+        <input type="text" id="search" placeholder="Buscar por nome…" oninput="filterTable()"/>
+      </div>
+      <select class="form-select form-select-sm" style="width:130px" id="f-tipo" onchange="filterTable()">
+        <option value="">Todos os tipos</option>
+        <option>PNG</option><option>JPG</option><option>JPEG</option><option>TXT</option>
+      </select>
+    </div>
+
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th class="hm">Tamanho</th>
+            <th class="hm">Data de Upload</th>
+            <th style="text-align:right">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <% if(files && files.length > 0) { %>
+            <% files.forEach(file => { %>
+              <%
+                const ext = file.original_name.split('.').pop().toLowerCase();
+                let sz;
+                if(file.size >= 1048576) sz = (file.size/1048576).toFixed(1)+' MB';
+                else if(file.size >= 1024) sz = Math.floor(file.size/1024)+' KB';
+                else sz = file.size+' B';
+                const dp = file.upload_date.slice(0,10).split('-');
+                const dateStr = dp[2]+'/'+dp[1]+'/'+dp[0];
+              %>
+              <tr>
+                <td>
+                  <div class="file-cell">
+                    <div class="file-thumb <%= ext %>"><%= ext.toUpperCase() %></div>
+                    <span class="file-n"><%= file.original_name %></span>
+                  </div>
+                </td>
+                <td class="hm text-muted" style="font-size:.81rem"><%= sz %></td>
+                <td class="hm text-muted" style="font-size:.81rem"><%= dateStr %></td>
+                <td>
+                  <div class="d-flex gap-1 justify-content-end">
+                    <a href="/home/download/<%= file.id %>" class="tbl-btn dl" title="Baixar">
+                      <i class="bi bi-download"></i>
+                    </a>
+                    <button class="tbl-btn ed" title="Renomear"
+                      onclick="openEdit(<%= file.id %>, '<%= file.original_name.replace(/'/g, "\\'") %>')">
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="tbl-btn del" title="Excluir"
+                      onclick="openDel(<%= file.id %>, '<%= file.original_name.replace(/'/g, "\\'") %>')">
+                      <i class="bi bi-trash3"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            <% }); %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+    <% if(!files || files.length === 0) { %>
+    <div class="empty-wrap">
+      <i class="bi bi-folder2-open d-block"></i>
+      <p>Nenhum arquivo encontrado.</p>
+    </div>
+    <% } %>
+
+    <div class="tbl-footer">
+      <div id="pg-info"><%= files ? files.length : 0 %> arquivo(s)</div>
+    </div>
+  </div>
+</main>
+
+<div class="t-stack" id="tstack"></div>
+
+<%- include('includes/modal/captcha', { csrfToken, user }) %>
+<%- include('includes/modal/upload', { csrfToken, user }) %>
+<%- include('includes/modal/profile', { csrfToken, user }) %>
+<%- include('includes/modal/password', { csrfToken, user }) %>
+<%- include('includes/modal/edit') %>
+<%- include('includes/modal/delete') %>
+<%- include('includes/modal/logout') %>
+<%- include('includes/modal/tokens') %>
+<script src="/js/home_user.js"></script>
+
+<%-include("includes/footer") %>

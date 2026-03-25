@@ -1,0 +1,63 @@
+<!-- Visível apenas para usuários comuns -->
+<% if(user && user.role !== 'admin') { %>
+<div class="modal fade" id="mCaptcha" tabindex="-1" data-csrf="<%= csrfToken %>" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-shield-check me-2 text-warning"></i>Verificação — Adicionar Moedas
+        </h5>
+      </div>
+      <div class="modal-body">
+        <!-- CAPTCHA DE TEXTO -->
+        <div id="cap-text-step">
+          <p class="text-muted mb-2" style="font-size:.84rem">
+            Digite os caracteres exibidos na imagem abaixo:
+          </p>
+          <!-- imagem de fundo + texto do captcha -->
+          <div class="cap-img-wrap">
+            <img src="/img/captcha-bg.png" alt="captcha background" draggable="false"/>
+            <span class="cap-text-display" id="cap-chars" aria-hidden="true"></span>
+          </div>
+          <!-- input + reload -->
+          <div class="cap-input-row">
+            <div class="cap-input-wrap">
+              <input
+                type="text"
+                id="cap-input"
+                class="cap-input"
+                placeholder="Digite os caracteres"
+                maxlength="6"
+                spellcheck="false"
+                autocomplete="off"
+              />
+            </div>
+            <button type="button" class="cap-reload-btn" onclick="buildTextCaptcha()" title="Gerar novo captcha">
+              <i class="bi bi-arrow-clockwise"></i>
+            </button>
+          </div>
+
+          <div class="cap-status" id="cap-status"></div>
+        </div>
+        <!-- CONCLUÍDO -->
+        <div id="cap-done-step" style="display:none">
+          <div class="cap-done">
+            <div class="done-ico"><i class="bi bi-check-circle-fill"></i></div>
+            <h6 class="fw-bold mb-1">Verificação concluída!</h6>
+            <p class="text-muted mb-0" style="font-size:.84rem">Captcha validado com sucesso.</p>
+            <div class="coin-pill">🪙 <span id="c-earned-n">+1</span> moeda desbloqueada</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal" onclick="resetTextCaptcha()">
+          Cancelar
+        </button>
+        <button class="btn btn-sm btn-warning text-white fw-semibold" id="c-next" onclick="capNext()">
+          Verificar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<% } %>

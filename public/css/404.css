@@ -1,0 +1,95 @@
+body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .err-card {
+      width: 100%;
+      max-width: 480px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 2.5rem 2rem;
+      box-shadow: 0 4px 24px rgba(0,0,0,.06);
+      text-align: center;
+    }
+    .err-code {
+      font-size: 5rem;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -.04em;
+      color: var(--accent);
+      margin-bottom: .25rem;
+    }
+    .err-icon {
+      font-size: 1.5rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+    .err-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: .4rem;
+    }
+    .err-sub {
+      font-size: .875rem;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 1.75rem;
+    }
+    .err-divider {
+      height: 1px;
+      background: var(--border);
+      margin-bottom: 1.75rem;
+    }
+    .err-actions {
+      display: flex;
+      gap: .65rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-go-home {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .55rem 1.25rem;
+      background: var(--accent);
+      border: none;
+      border-radius: 7px;
+      color: #fff;
+      font-family: inherit;
+      font-size: .875rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all .15s;
+    }
+    .btn-go-home:hover {
+      background: var(--accent-h);
+      color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(59,91,219,.25);
+    }
+    .btn-go-back {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .55rem 1.25rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: .875rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all .15s;
+    }
+    .btn-go-back:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--bg);
+    }

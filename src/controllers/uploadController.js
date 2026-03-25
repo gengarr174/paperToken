@@ -9,13 +9,14 @@ export const add = async function (req, res) {
             return req.session.save(() => res.redirect("/home"));
         }
         const file = new Upload(req.file, req.session);
-        await file.upload();
+        const tokensUpdate = await file.upload();
 
         if (file.errors.length > 0) {
             if (req.file?.path) await fs.unlink(req.file.path).catch(() => {});
             req.flash("errors", file.errors);
             return req.session.save(() => res.redirect("/home"));
         }
+        req.session.user.tokens = tokensUpdate.tokens;
         req.flash("success", "Arquivo salvo com sucesso");
         return req.session.save(() => res.redirect("/home"));
     } catch (e) {
@@ -28,6 +29,6 @@ export const add = async function (req, res) {
             return req.session.save(() => res.redirect("/home"));
         }
         console.error(e);
-        return res.status(500).render("404");
+        return res.status(500).render("500");
     }
 }

@@ -1,0 +1,143 @@
+<%- include("includes/header") %>
+  <link href="/css/auth.css" rel="stylesheet" />
+</head>
+<body>
+  <div class="auth-layout">
+    <section class="auth-left">
+        <img src="img/undraw_upload_cucu.svg" alt="Ilustração de armazenamento em nuvem" />
+    </section>
+    <section class="auth-right">
+      <div class="auth-card">
+
+        <a class="auth-brand" href="/">
+          <div class="brand-dot"></div>Paper Token
+        </a>
+
+        <%- include("includes/messages") %>
+
+          <div class="auth-tabs">
+            <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Entrar</button>
+            <button class="auth-tab" id="tab-register" onclick="switchTab('register')">Criar conta</button>
+          </div>
+
+          <div class="auth-panel active" id="panel-login">
+
+            <div class="auth-title">Bem-vindo de volta</div>
+            <div class="auth-sub">Entre com suas credenciais para acessar o painel.</div>
+
+            <form action="/auth/login" method="POST" novalidate>
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+              <div class="f-group">
+                <label for="lg-email">E-mail</label>
+                <input class="f-input" type="email" id="lg-email" name="email" placeholder="voce@empresa.com"
+                  autocomplete="email" required />
+              </div>
+
+              <div class="f-group">
+                <label for="lg-pass">Senha</label>
+                <div class="pass-wrap">
+                  <input class="f-input" type="password" id="lg-pass" name="password" placeholder="••••••••"
+                    autocomplete="current-password" required />
+                  <button type="button" class="pass-eye" onclick="toggleEye('lg-pass', this)">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="auth-divider"></div>
+
+              <button type="submit" class="btn-auth">
+                <i class="bi bi-box-arrow-in-right"></i> Entrar
+              </button>
+            </form>
+
+          </div>
+
+          <div class="auth-panel" id="panel-register">
+
+            <div class="auth-title">Criar conta</div>
+            <div class="auth-sub">Preencha os dados abaixo para se registrar.</div>
+
+            <form action="/auth/register" method="POST" novalidate>
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+              <div class="form-row">
+                <div class="f-group">
+                  <label for="rg-name">Nome</label>
+                  <input class="f-input" type="text" id="rg-name" name="name" placeholder="Ana" required />
+                </div>
+                <div class="f-group">
+                  <label for="rg-last">Sobrenome</label>
+                  <input class="f-input" type="text" id="rg-last" name="last_name" placeholder="Costa" required />
+                </div>
+              </div>
+
+              <div class="f-group">
+                <label for="rg-email">E-mail</label>
+                <input class="f-input" type="email" id="rg-email" name="email" placeholder="voce@empresa.com"
+                  autocomplete="email" required />
+              </div>
+
+              <div class="f-group">
+                <label for="rg-pass">Senha</label>
+                <div class="pass-wrap">
+                  <input class="f-input" type="password" id="rg-pass" name="password" placeholder="Mínimo 6 caracteres"
+                    autocomplete="new-password" required oninput="checkStrength(this.value)" />
+                  <button type="button" class="pass-eye" onclick="toggleEye('rg-pass', this)">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </div>
+                <div class="strength-bar">
+                  <div class="strength-fill" id="s-fill"></div>
+                </div>
+                <div class="strength-lbl" id="s-lbl"></div>
+              </div>
+
+              <div class="f-group">
+                <label for="rg-pass2">Confirmar Senha</label>
+                <div class="pass-wrap">
+                  <input class="f-input" type="password" id="rg-pass2" name="password2" placeholder="Repita a senha"
+                    autocomplete="new-password" required />
+                  <button type="button" class="pass-eye" onclick="toggleEye('rg-pass2', this)">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="role-toggle" id="role-toggle" onclick="toggleRole()">
+                <div class="role-toggle-label">
+                  <i class="bi bi-shield-lock"></i>
+                  Possui cargo?
+                </div>
+                <div class="sw" id="role-sw"></div>
+              </div>
+
+              <div class="key-field" id="key-field">
+                <div class="f-group" style="margin-bottom:.85rem">
+                  <label for="rg-key">Chave Secreta de Cargo</label>
+                  <div style="position:relative">
+                    <input class="f-input" type="password" id="rg-key" name="accessKey"
+                      placeholder="Digite a chave de acesso" autocomplete="off" />
+                    <button type="button" class="pass-eye" onclick="toggleEye('rg-key', this)">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="auth-divider"></div>
+
+              <button type="submit" class="btn-auth">
+                <i class="bi bi-person-plus"></i> Criar Conta
+              </button>
+            </form>
+
+          </div>
+
+      </div>
+    </section>
+  </div>
+  <script src="/js/auth.js"></script>
+
+  <%- include("includes/footer") %>

@@ -1,0 +1,36 @@
+<%- include("includes/header") %>
+<link href="/css/500.css" rel="stylesheet"/>
+</head>
+<body>
+  <div class="err-card">
+    <a class="navbar-brand d-inline-flex align-items-center gap-2 mb-3 text-decoration-none" href="/">
+      <div class="brand-dot"></div>
+      <span style="font-weight:700;font-size:1rem;color:var(--accent)">Paper Token</span>
+    </a>
+
+    <div class="err-code">500</div>
+    <div class="err-icon"><i class="bi bi-exclamation-octagon"></i></div>
+    <div class="err-title">Erro interno do servidor</div>
+
+    <div class="err-detail">
+      <i class="bi bi-lightning-charge-fill"></i>
+      Algo deu errado no servidor
+    </div>
+
+    <div class="err-sub">
+      Ocorreu um erro inesperado ao processar sua requisição.<br/>
+      Nossa equipe foi notificada. Tente novamente em instantes.
+    </div>
+
+    <div class="err-divider"></div>
+
+    <div class="err-actions">
+      <a href="javascript:history.back()" class="btn-go-back">
+        <i class="bi bi-arrow-left"></i> Voltar
+      </a>
+      <a href="/home" class="btn-go-home">
+        <i class="bi bi-house"></i> Ir para o painel
+      </a>
+    </div>
+  </div>
+<%-include("includes/footer") %>
