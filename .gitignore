@@ -4,3 +4,6 @@ uploads
 database/*
 !database/.gitkeep
 log
+
+*.db
+*.sqlite
