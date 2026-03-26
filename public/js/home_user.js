@@ -150,9 +150,8 @@ function setCapStatus(msg, type) {
   el.textContent = msg;
   el.className = 'cap-status' + (type ? ' ' + type : '');
 }
-
-/* Lógica principal do captcha */
-function capNext() {
+// Função principal do captcha: valida ou envia requisição
+async function capNext() {
   const modalEl = document.getElementById('mCaptcha');
   const input = document.getElementById('cap-input');
   const charsEl = document.getElementById('cap-chars');
@@ -161,37 +160,42 @@ function capNext() {
   const nextBtn = document.getElementById('c-next');
 
   if (!modalEl || !input || !charsEl || !textStep || !doneStep || !nextBtn) return;
-
+  // Se já validou o captcha → envia requisição para ganhar token
   if (capDone) {
-    const modalEl = document.getElementById('mCaptcha');
     const csrf = modalEl.dataset.csrf;
-
-    fetch('/captcha/addToken', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ _csrf: csrf })
-    }).then(async r => {
-      const data = await r.json().catch(() => ({}));
-
-      if (r.ok) {
+    try {
+      // Envia requisição POST para o backend
+      const req = await fetch('/captcha/addToken', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ _csrf: csrf })
+      });
+      // Tenta converter resposta para JSON
+      const data = await req.json().catch(() => ({}));
+      // Se deu certo
+      if (req.ok) {
         bootstrap.Modal.getInstance(modalEl).hide();
         toast('+1 moeda adicionada! 🪙', 'gold');
+        // Recarrega a página após 1.5s
         setTimeout(() => location.reload(), 1500);
       } else {
+        // Erro vindo do backend
         toast(data.error || 'Erro ao adicionar moeda.', 'err');
       }
-    }).catch(() => toast('Erro de conexão.', 'err'));
+    } catch (e) {
+      // Erro de conexão
+      toast('Erro de conexão.', 'err');
+    }
 
     return;
   }
-
   const inputVal = input.value.split('').join(' ');
-
+  // Valida o texto digitado com o captcha exibido
   if (inputVal === charsEl.textContent) {
     input.classList.remove('cap-err');
     input.classList.add('cap-ok');
     setCapStatus('Verificado! Você não parece ser um robô.', 'ok');
-
+    // Avança para etapa de coleta
     setTimeout(() => {
       textStep.style.display = 'none';
       doneStep.style.display = 'block';
@@ -199,6 +203,7 @@ function capNext() {
       capDone = true;
     }, 900);
   } else {
+    // Captcha incorreto → feedback + gera novo
     input.classList.add('cap-err');
     input.classList.remove('cap-ok');
     setCapStatus('Captcha incorreto. Um novo foi gerado.', 'err');
