@@ -1,6 +1,7 @@
 import User from "../models/UserModel.js";
 
-export const updateProfile = async function (req, res) {
+// Atualiza os dados básicos do perfil do usuário
+export const updateProfile = async function (req, res, next) {
     if (!req.session?.user) return res.redirect("/auth");
 
     try {
@@ -12,29 +13,32 @@ export const updateProfile = async function (req, res) {
         );
 
         if (!update) {
-            req.flash("errors", "Falha na atualização de perfil");
+            req.flash("errors", "Falha na atualização do perfil");
             return req.session.save(() => res.redirect("/home"));
         }
 
+        // Atualiza os dados do usuário na sessão
         req.session.user.name = req.body.name?.trim();
         req.session.user.last_name = req.body.last_name?.trim();
         req.session.user.email = req.body.email?.trim();
 
         req.flash("success", "Perfil atualizado com sucesso");
         return req.session.save(() => res.redirect("/home"));
+
     } catch (e) {
-        console.error(e);
-        req.flash("errors", "Erro ao atualizar perfil");
-        return req.session.save(() => res.redirect("/home"));
+        // Envia erro inesperado para o middleware global (logger)
+        next(e);
     }
 };
 
-export const updatePassword = async function (req, res) {
+// Atualiza a senha do usuário autenticado
+export const updatePassword = async function (req, res, next) {
     if (!req.session?.user) return res.redirect("/auth");
 
     try {
         const { currentPassword, newPassword, confirmPassword } = req.body;
 
+        // Confere se a nova senha foi confirmada corretamente
         if (newPassword !== confirmPassword) {
             req.flash("errors", "A confirmação da nova senha não confere");
             return req.session.save(() => res.redirect("/home"));
@@ -47,15 +51,15 @@ export const updatePassword = async function (req, res) {
         );
 
         if (!update) {
-            req.flash("errors", "Falha na atualização de senha");
+            req.flash("errors", "Falha na atualização da senha");
             return req.session.save(() => res.redirect("/home"));
         }
 
         req.flash("success", "Senha atualizada com sucesso");
         return req.session.save(() => res.redirect("/home"));
+
     } catch (e) {
-        console.error(e);
-        req.flash("errors", "Erro ao atualizar senha");
-        return req.session.save(() => res.redirect("/home"));
+        // Envia erro inesperado para o middleware global (logger)
+        next(e);
     }
 };

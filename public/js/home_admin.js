@@ -1,87 +1,93 @@
-/* EDIT modal — admin: alterar status */
-function openEditAdmin(id, name, newStatus) {
-  const eid = document.getElementById('eid');
-  const estatus = document.getElementById('estatus');
-  const title = document.getElementById('mEditTitle');
-  const msg = document.getElementById('mEditMsg');
-  const btn = document.getElementById('mEditBtn');
-  const modalEl = document.getElementById('mEdit');
+/* Abre modal de edição para admin (banir/desbanir usuário) */
+function openAdminEditModal(userId, userName, newStatus) {
+  const inputUserId = document.getElementById('eid');
+  const inputStatus = document.getElementById('estatus');
+  const modalTitle = document.getElementById('mEditTitle');
+  const modalMessage = document.getElementById('mEditMsg');
+  const actionButton = document.getElementById('mEditBtn');
+  const modal = document.getElementById('mEdit');
 
-  if (!eid || !estatus || !title || !msg || !btn || !modalEl) return;
+  if (!inputUserId || !inputStatus || !modalTitle || !modalMessage || !actionButton || !modal) return;
 
-  eid.value = id;
-  estatus.value = newStatus;
+  inputUserId.value = userId;
+  inputStatus.value = newStatus;
 
-  const ban = newStatus === 'banned';
+  const isBanAction = newStatus === 'banned';
 
-  title.textContent = ban ? 'Banir Usuário' : 'Desbanir Usuário';
-  msg.innerHTML = ban
-    ? `Banir o usuário <strong>${name}</strong>? Ele não poderá mais acessar o sistema.`
-    : `Reativar o acesso do usuário <strong>${name}</strong>?`;
+  // Define conteúdo do modal conforme ação
+  modalTitle.textContent = isBanAction ? 'Banir Usuário' : 'Desbanir Usuário';
 
-  btn.textContent = ban ? 'Banir' : 'Desbanir';
-  btn.className = 'btn btn-sm ' + (ban ? 'btn-warning text-white' : 'btn-success text-white');
+  modalMessage.innerHTML = isBanAction
+    ? `Banir o usuário <strong>${userName}</strong>? Ele não poderá mais acessar o sistema.`
+    : `Reativar o acesso do usuário <strong>${userName}</strong>?`;
 
-  new bootstrap.Modal(modalEl).show();
+  actionButton.textContent = isBanAction ? 'Banir' : 'Desbanir';
+
+  actionButton.className =
+    'btn btn-sm ' + (isBanAction ? 'btn-warning text-white' : 'btn-success text-white');
+
+  new bootstrap.Modal(modal).show();
 }
 
-/* DELETE modal */
-function openDelAdmin(id, name) {
-  const did = document.getElementById('did');
-  const dname = document.getElementById('dname');
-  const modalEl = document.getElementById('mDel');
+/* Abre modal de exclusão de usuário */
+function openAdminDeleteModal(userId, userName) {
+  const inputUserId = document.getElementById('did');
+  const userNameLabel = document.getElementById('dname');
+  const modal = document.getElementById('mDel');
 
-  if (!did || !dname || !modalEl) return;
+  if (!inputUserId || !userNameLabel || !modal) return;
 
-  did.value = id;
-  dname.textContent = name;
+  inputUserId.value = userId;
+  userNameLabel.textContent = userName;
 
-  new bootstrap.Modal(modalEl).show();
+  new bootstrap.Modal(modal).show();
 }
 
-/* TABLE filter */
-function filterTableAdmin() {
-  const searchEl = document.getElementById('search');
-  const statusEl = document.getElementById('f-status');
-  const infoEl = document.getElementById('pg-info');
-  const rows = document.querySelectorAll('#tbody tr');
+/* Filtra a tabela de usuários */
+function filterAdminTable() {
+  const searchInput = document.getElementById('search');
+  const statusFilter = document.getElementById('f-status');
+  const infoLabel = document.getElementById('pg-info');
+  const tableRows = document.querySelectorAll('#tbody tr');
 
-  if (!searchEl || !statusEl || !infoEl) return;
+  if (!searchInput || !statusFilter || !infoLabel) return;
 
-  const q = searchEl.value.toLowerCase().trim();
-  const st = statusEl.value;
+  const query = searchInput.value.toLowerCase().trim();
+  const selectedStatus = statusFilter.value;
 
-  let visible = 0;
+  let visibleCount = 0;
 
-  rows.forEach(row => {
-    const name = (row.dataset.name || '').toLowerCase();
-    const email = (row.dataset.email || '').toLowerCase();
-    const status = row.dataset.status || '';
+  tableRows.forEach(row => {
+    const userName = (row.dataset.name || '').toLowerCase();
+    const userEmail = (row.dataset.email || '').toLowerCase();
+    const userStatus = row.dataset.status || '';
 
-    const show =
-      (!q || name.includes(q) || email.includes(q)) &&
-      (!st || status === st);
+    const shouldShow =
+      (!query || userName.includes(query) || userEmail.includes(query)) &&
+      (!selectedStatus || userStatus === selectedStatus);
 
-    row.style.display = show ? '' : 'none';
+    row.style.display = shouldShow ? '' : 'none';
 
-    if (show) visible++;
+    if (shouldShow) visibleCount++;
   });
 
-  infoEl.textContent = `${visible} usuário(s)`;
+  // Atualiza contador
+  infoLabel.textContent = `${visibleCount} usuário(s)`;
 }
 
-/* TOAST */
-function toast(msg, type = 'ok') {
-  const s = document.getElementById('tstack');
-  if (!s) return;
+/* Exibe uma mensagem toast temporária */
+function showToast(message, type = 'ok') {
+  const toastContainer = document.getElementById('tstack');
+  if (!toastContainer) return;
 
-  const el = document.createElement('div');
-  el.className = 'a-toast ' + type;
-  el.innerHTML = '<div class="td"></div>' + msg;
+  const toastElement = document.createElement('div');
+  toastElement.className = 'a-toast ' + type;
+  toastElement.innerHTML = '<div class="td"></div>' + message;
 
-  s.appendChild(el);
+  toastContainer.appendChild(toastElement);
 
+  // Remove após 3 segundos
   setTimeout(() => {
-    el.remove();
+    toastElement.remove();
   }, 3000);
 }

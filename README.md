@@ -106,6 +106,7 @@ paper-token/
 │   └── routes.js
 │
 ├── uploads/                  # Arquivos enviados pelos usuários (gerado em runtime)
+├── log/                      # Logs do sistema
 ├── app.js
 ├── server.js
 ├── .env
@@ -127,6 +128,7 @@ paper-token/
 | Segurança | Helmet, csurf, connect-flash |
 | Frontend | Bootstrap 5 + Bootstrap Icons |
 | Validação | validator.js |
+| Logger | winston.js |
 
 ---
 
@@ -153,9 +155,9 @@ ADMIN_KEY=chave_para_registro_admin
 DB_PATH=./database/data.db
 ```
 
-**4. Cria a pasta de uploads**
+**4. Cria a pasta de uploads e log**
 
-Crie a pasta `./uploads` na raiz do projeto
+Crie a pasta `./uploads` e `./log` na raiz do projeto
 
 **5. Inicie o servidor**
 ```bash
@@ -192,9 +194,3 @@ Acesse em `http://localhost:3000`
 | Listar usuários | ❌ | ✅ |
 | Banir / desbanir usuários | ❌ | ✅ |
 | Excluir usuários | ❌ | ✅ |
-
----
-
-## 📄 Licença
-
-Este projeto está sob a licença MIT.

@@ -1,19 +1,22 @@
-import Login from "../models/LoginModel.js"
+import Login from "../models/LoginModel.js";
 
+// Renderiza a página de autenticação
 export const index = (req, res) => {
-    if (req.session?.user)
-        return res.redirect("/home");
-    return res.render("auth",{csrfToken: req.csrfToken()});
-}
+    if (req.session?.user) return res.redirect("/home");
 
-export const register = async function (req, res) {
+    return res.render("auth", { csrfToken: req.csrfToken() });
+};
+// Cadastra um novo usuário e inicia a sessão
+export const register = async function (req, res, next) {
     try {
         const register = new Login(req.body);
         await register.register();
+        // Redireciona de volta se houver erros de validação
         if (register.errors.length > 0) {
             req.flash("errors", register.errors);
             return req.session.save(() => res.redirect("/auth"));
         }
+        // Regenera a sessão por segurança após o cadastro
         req.session.regenerate(err => {
             if (err) {
                 console.error(err);
@@ -31,27 +34,25 @@ export const register = async function (req, res) {
             return req.session.save(() => res.redirect("/home"));
         });
     } catch (e) {
-        console.error(e)
-        return res.status(500).render("500");
+        next(e);
     }
-}
-
-export const login = async function (req, res) {
+};
+// Autentica o usuário e inicia a sessão
+export const login = async function (req, res, next) {
     try {
-        const login = new Login(req.body)
+        const login = new Login(req.body);
         await login.login();
-
+        // Redireciona de volta se houver erros de validação
         if (login.errors.length > 0) {
             req.flash("errors", login.errors);
             return req.session.save(() => res.redirect("/auth"));
         }
-
+        // Regenera a sessão por segurança após o login
         req.session.regenerate(err => {
             if (err) {
-                console.log(err);
-                return res.render("404");
+                console.error(err);
+                return res.status(500).render("500");
             }
-
             req.session.user = {
                 id: login.user.id,
                 name: login.user.name,
@@ -59,24 +60,23 @@ export const login = async function (req, res) {
                 email: login.user.email,
                 role: login.user.role,
                 tokens: login.user.tokens
-            }
-
+            };
             req.flash("success", "Login realizado com sucesso");
             return req.session.save(() => res.redirect("/home"));
-        })
+        });
     } catch (e) {
-        console.error(e);
-        return res.status(500).render("500");
+        next(e);
     }
-}
-
-export const logout = function (req, res) {
+};
+// Encerra a sessão do usuário
+export const logout = function (req, res, next) {
     req.session.destroy(err => {
         if (err) {
             console.error(err);
             return res.status(500).render("500");
         }
+
         res.clearCookie("connect.sid");
         return res.redirect("/auth");
-    })
-}
+    });
+};

@@ -2,13 +2,14 @@ import * as db from "../database/connection.js";
 
 class Captcha {
     static async addToken(id) {
-        if (!id || isNaN(id)) throw new Error("ID inválido");
+        if (!id || isNaN(id)) throw new Error("ID inválido"); // verifica se o ID é um número válido
 
         const user = await db.get(
             `SELECT tokens, status FROM users WHERE id = ?`,
             [id]
         );
 
+        //tratamento de erros do user
         if (!user) throw new Error("Usuário não encontrado");
         if (user.status === "banned") throw new Error("Usuário banido");
         if (user.tokens >= 101) throw new Error("Limite de tokens atingido");
@@ -19,7 +20,7 @@ class Captcha {
         );
 
         if (update.changes === 0) {
-            throw new Error("Usuário não encontrado");
+            throw new Error("Erro ao adicionar token");
         }
 
         const result = await db.get(

@@ -1,233 +1,239 @@
-/* Mostrar as infos do arquivo selecionado antes do upload */
-function handleFile(f) {
-  if (!f) return;
+/* Mostra as informações do arquivo selecionado antes do upload */
+function previewSelectedFile(file) {
+  if (!file) return;
 
-  const fp = document.getElementById('fp');
-  if (!fp) return;
+  const previewContainer = document.getElementById('fp');
+  if (!previewContainer) return;
 
-  fp.style.display = 'block';
+  previewContainer.style.display = 'block';
 
-  const sz =
-    f.size >= 1048576
-      ? (f.size / 1048576).toFixed(1) + ' MB'
-      : f.size >= 1024
-      ? Math.floor(f.size / 1024) + ' KB'
-      : f.size + ' B';
+  const fileSize =
+    file.size >= 1048576
+      ? (file.size / 1048576).toFixed(1) + ' MB'
+      : file.size >= 1024
+        ? Math.floor(file.size / 1024) + ' KB'
+        : file.size + ' B';
 
-  fp.innerHTML = `
+  previewContainer.innerHTML = `
     <div class="fp-row mt-2">
       <i class="bi bi-file-earmark-fill text-primary"></i>
-      <span class="fp-name">${f.name}</span>
-      <span class="fp-sz">${sz}</span>
+      <span class="fp-name">${file.name}</span>
+      <span class="fp-sz">${fileSize}</span>
     </div>
   `;
 }
 
-function handleDrop(e) {
-  e.preventDefault();
+/* Trata o arquivo arrastado para a área de upload */
+function handleFileDrop(event) {
+  event.preventDefault();
 
-  const uz = document.getElementById('uz');
-  if (uz) uz.classList.remove('drag');
+  const uploadZone = document.getElementById('uz');
+  if (uploadZone) uploadZone.classList.remove('drag');
 
-  const fi = document.getElementById('fi');
-  const file = e.dataTransfer?.files?.[0];
+  const fileInput = document.getElementById('fi');
+  const droppedFile = event.dataTransfer?.files?.[0];
 
-  if (!fi || !file) return;
+  if (!fileInput || !droppedFile) return;
 
-  const dt = new DataTransfer();
-  dt.items.add(file);
-  fi.files = dt.files;
+  const dataTransfer = new DataTransfer();
+  dataTransfer.items.add(droppedFile);
+  fileInput.files = dataTransfer.files;
 
-  handleFile(file);
+  previewSelectedFile(droppedFile);
 }
 
-/* Modal de edit de arquivos */
-function openEdit(id, name) {
-  const eid = document.getElementById('eid');
-  const ename = document.getElementById('ename');
-  const modalEl = document.getElementById('mEdit');
+/* Abre o modal de edição de arquivo */
+function openEditModal(fileId, fileName) {
+  const inputId = document.getElementById('eid');
+  const inputName = document.getElementById('ename');
+  const modal = document.getElementById('mEdit');
 
-  if (!eid || !ename || !modalEl) return;
+  if (!inputId || !inputName || !modal) return;
 
-  eid.value = id;
-  ename.value = name;
+  inputId.value = fileId;
+  inputName.value = fileName;
 
-  new bootstrap.Modal(modalEl).show();
+  new bootstrap.Modal(modal).show();
 }
 
-/* Modal de delete de arquivos */
-function openDel(id, name) {
-  const did = document.getElementById('did');
-  const dname = document.getElementById('dname');
-  const modalEl = document.getElementById('mDel');
+/* Abre o modal de exclusão de arquivo */
+function openDeleteModal(fileId, fileName) {
+  const deleteId = document.getElementById('did');
+  const deleteName = document.getElementById('dname');
+  const modal = document.getElementById('mDel');
 
-  if (!did || !dname || !modalEl) return;
+  if (!deleteId || !deleteName || !modal) return;
 
-  did.value = id;
-  dname.textContent = name;
+  deleteId.value = fileId;
+  deleteName.textContent = fileName;
 
-  new bootstrap.Modal(modalEl).show();
+  new bootstrap.Modal(modal).show();
 }
 
-/* Modal do filtro da tabela de arquivos */
-function filterTableUser() {
-  const searchEl = document.getElementById('search');
-  const tipoEl = document.getElementById('f-tipo');
-  const infoEl = document.getElementById('pg-info');
-  const rows = document.querySelectorAll('#tbody tr');
+/* Filtra a tabela de arquivos */
+function filterUserTable() {
+  const searchInput = document.getElementById('search');
+  const typeFilter = document.getElementById('f-tipo');
+  const infoLabel = document.getElementById('pg-info');
+  const tableRows = document.querySelectorAll('#tbody tr');
 
-  if (!searchEl || !tipoEl || !infoEl) return;
+  if (!searchInput || !typeFilter || !infoLabel) return;
 
-  const q = searchEl.value.toLowerCase();
-  const tp = tipoEl.value.toLowerCase();
+  const query = searchInput.value.toLowerCase();
+  const selectedType = typeFilter.value.toLowerCase();
 
-  let visible = 0;
+  let visibleCount = 0;
 
-  rows.forEach(row => {
-    const name = row.querySelector('.file-n')?.textContent.toLowerCase() || '';
-    const ext = row.querySelector('.file-thumb')?.textContent.toLowerCase() || '';
+  tableRows.forEach(row => {
+    const fileName = row.querySelector('.file-n')?.textContent.toLowerCase() || '';
+    const fileType = row.querySelector('.file-thumb')?.textContent.toLowerCase() || '';
 
-    const show = (!q || name.includes(q)) && (!tp || ext === tp);
+    const shouldShow =
+      (!query || fileName.includes(query)) &&
+      (!selectedType || fileType === selectedType);
 
-    row.style.display = show ? '' : 'none';
+    row.style.display = shouldShow ? '' : 'none';
 
-    if (show) visible++;
+    if (shouldShow) visibleCount++;
   });
 
-  infoEl.textContent = `${visible} arquivo(s)`;
+  infoLabel.textContent = `${visibleCount} arquivo(s)`;
 }
 
-/* Caracteres do texto do captcha */
-const CAP_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-let capCurrentText = '';
-let capDone = false;
+/* Caracteres usados no captcha */
+const CAPTCHA_CHARACTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
-/* Gera 6 caracteres aleatórios e exibe na imagem */
-function buildTextCaptcha() {
-  const charsEl = document.getElementById('cap-chars');
-  const input = document.getElementById('cap-input');
-  const nextBtn = document.getElementById('c-next');
+let currentCaptchaText = '';
+let isCaptchaValidated = false;
 
-  if (!charsEl || !input || !nextBtn) return;
+/* Gera um novo captcha */
+function generateCaptcha() {
+  const captchaDisplay = document.getElementById('cap-chars');
+  const captchaInput = document.getElementById('cap-input');
+  const nextButton = document.getElementById('c-next');
 
-  capCurrentText = '';
+  if (!captchaDisplay || !captchaInput || !nextButton) return;
+
+  currentCaptchaText = '';
 
   for (let i = 0; i < 6; i++) {
-    capCurrentText += CAP_CHARS[Math.floor(Math.random() * CAP_CHARS.length)];
+    currentCaptchaText += CAPTCHA_CHARACTERS[Math.floor(Math.random() * CAPTCHA_CHARACTERS.length)];
   }
 
-  charsEl.textContent = capCurrentText.split('').join(' ');
+  captchaDisplay.textContent = currentCaptchaText.split('').join(' ');
 
-  input.value = '';
-  input.classList.remove('cap-err', 'cap-ok');
+  captchaInput.value = '';
+  captchaInput.classList.remove('cap-err', 'cap-ok');
 
-  setCapStatus('', '');
-  capDone = false;
-  nextBtn.textContent = 'Verificar';
+  setCaptchaStatus('', '');
+  isCaptchaValidated = false;
+
+  nextButton.textContent = 'Verificar';
 }
 
-/* Reseta tudo ao fechar/cancelar */
-function resetTextCaptcha() {
+/* Reseta o captcha */
+function resetCaptcha() {
   const textStep = document.getElementById('cap-text-step');
   const doneStep = document.getElementById('cap-done-step');
-  const nextBtn = document.getElementById('c-next');
+  const nextButton = document.getElementById('c-next');
 
-  buildTextCaptcha();
+  generateCaptcha();
 
   if (textStep) textStep.style.display = 'block';
   if (doneStep) doneStep.style.display = 'none';
-  if (nextBtn) nextBtn.textContent = 'Verificar';
+  if (nextButton) nextButton.textContent = 'Verificar';
 
-  capDone = false;
+  isCaptchaValidated = false;
 }
 
-/* Define o texto de status embaixo do input */
-function setCapStatus(msg, type) {
-  const el = document.getElementById('cap-status');
-  if (!el) return;
+/* Define status do captcha */
+function setCaptchaStatus(message, type) {
+  const statusEl = document.getElementById('cap-status');
+  if (!statusEl) return;
 
-  el.textContent = msg;
-  el.className = 'cap-status' + (type ? ' ' + type : '');
+  statusEl.textContent = message;
+  statusEl.className = 'cap-status' + (type ? ' ' + type : '');
 }
 
-/* Botão principal — verifica ou coleta */
-function capNext() {
-  const modalEl = document.getElementById('mCaptcha');
+/* Lógica principal do captcha */
+async function handleCaptchaNext() {
+  const modal = document.getElementById('mCaptcha');
   const input = document.getElementById('cap-input');
-  const charsEl = document.getElementById('cap-chars');
+  const captchaDisplay = document.getElementById('cap-chars');
   const textStep = document.getElementById('cap-text-step');
   const doneStep = document.getElementById('cap-done-step');
-  const nextBtn = document.getElementById('c-next');
+  const nextButton = document.getElementById('c-next');
 
-  if (!modalEl || !input || !charsEl || !textStep || !doneStep || !nextBtn) return;
+  if (!modal || !input || !captchaDisplay || !textStep || !doneStep || !nextButton) return;
 
-  if (capDone) {
-    const modalEl = document.getElementById('mCaptcha');
-    const csrf = modalEl.dataset.csrf;
+  if (isCaptchaValidated) {
+    const csrfToken = modal.dataset.csrf;
 
-    fetch('/captcha/addToken', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ _csrf: csrf })
-    }).then(async r => {
-      const data = await r.json().catch(() => ({}));
+    try {
+      const response = await fetch('/captcha/addToken', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ _csrf: csrfToken })
+      });
 
-      if (r.ok) {
-        bootstrap.Modal.getInstance(modalEl).hide();
-        toast('+1 moeda adicionada! 🪙', 'gold');
+      const data = await response.json().catch(() => ({}));
+
+      if (response.ok) {
+        bootstrap.Modal.getInstance(modal).hide();
+        showToast('+1 moeda adicionada! 🪙', 'gold');
         setTimeout(() => location.reload(), 1500);
       } else {
-        toast(data.error || 'Erro ao adicionar moeda.', 'err');
+        showToast(data.error || 'Erro ao adicionar moeda.', 'err');
       }
-    }).catch(() => toast('Erro de conexão.', 'err'));
+
+    } catch {
+      showToast('Erro de conexão.', 'err');
+    }
 
     return;
   }
 
-  const inputVal = input.value.split('').join(' ');
+  const userInput = input.value.split('').join(' ');
 
-  if (inputVal === charsEl.textContent) {
+  if (userInput === captchaDisplay.textContent) {
     input.classList.remove('cap-err');
     input.classList.add('cap-ok');
-    setCapStatus('Verificado! Você não parece ser um robô.', 'ok');
+    setCaptchaStatus('Verificado! Você não parece ser um robô.', 'ok');
 
     setTimeout(() => {
       textStep.style.display = 'none';
       doneStep.style.display = 'block';
-      nextBtn.textContent = 'Coletar Moeda';
-      capDone = true;
+      nextButton.textContent = 'Coletar Moeda';
+      isCaptchaValidated = true;
     }, 900);
+
   } else {
     input.classList.add('cap-err');
     input.classList.remove('cap-ok');
-    setCapStatus('Captcha incorreto. Um novo foi gerado.', 'err');
+    setCaptchaStatus('Captcha incorreto. Um novo foi gerado.', 'err');
 
-    setTimeout(() => {
-      buildTextCaptcha();
-    }, 1200);
+    setTimeout(() => generateCaptcha(), 1200);
   }
 }
 
-/* Abre o modal sempre com captcha novo */
-const mCaptcha = document.getElementById('mCaptcha');
-if (mCaptcha) {
-  mCaptcha.addEventListener('show.bs.modal', () => {
-    resetTextCaptcha();
+/* Inicializa o captcha ao abrir o modal */
+const captchaModal = document.getElementById('mCaptcha');
+if (captchaModal) {
+  captchaModal.addEventListener('show.bs.modal', () => {
+    resetCaptcha();
   });
 }
 
-/* TOAST */
-function toast(msg, type = 'ok') {
-  const s = document.getElementById('tstack');
-  if (!s) return;
+/* Exibe toast */
+function showToast(message, type = 'ok') {
+  const stack = document.getElementById('tstack');
+  if (!stack) return;
 
-  const el = document.createElement('div');
-  el.className = 'a-toast ' + type;
-  el.innerHTML = '<div class="td"></div>' + msg;
+  const toastEl = document.createElement('div');
+  toastEl.className = 'a-toast ' + type;
+  toastEl.innerHTML = '<div class="td"></div>' + message;
 
-  s.appendChild(el);
+  stack.appendChild(toastEl);
 
-  setTimeout(() => {
-    el.remove();
-  }, 3000);
+  setTimeout(() => toastEl.remove(), 3000);
 }

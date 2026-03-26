@@ -18,8 +18,6 @@ body {
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
-  background:
-    radial-gradient(circle at top left, #eef2ff 0%, #f7f9ff 38%, #ffffff 100%);
 }
 .auth-left img {
   width: min(560px, 85%);

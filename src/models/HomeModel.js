@@ -2,11 +2,10 @@ import * as db from "../database/connection.js";
 import path from "path";
 import {fileURLToPath} from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 class Home {
-
+    // Retorna estatísticas dos arquivos do usuário
     static async countFiles(userID) {
         return await Promise.all([
             db.all(`SELECT COUNT(*) AS total_files
@@ -20,7 +19,7 @@ class Home {
             [userID])
         ]);
     }
-
+    // Lista todos os arquivos do usuário
     static async allFiles(userID) {
         return await db.all(
             `SELECT id, original_name, size, upload_date
@@ -30,7 +29,7 @@ class Home {
             [userID]
         );
     }
-
+    // Edita o nome original de um arquivo
     static async editFile(fileID, userID, original_name) {
         if (!fileID || isNaN(fileID)) return null;
         if (!original_name) return null;
@@ -44,33 +43,33 @@ class Home {
 
         return result.changes > 0;
     }
-
+    // Exclui um arquivo do usuário
     static async deleteFile(fileID, userID) {
         if (!fileID || isNaN(fileID)) return null;
 
         const result = await db.run(
             `DELETE FROM archives
             WHERE id = ? AND user_id = ?`,
-            [fileID,userID]
+            [fileID, userID]
         );
 
         return result.changes > 0;
     }
-
-    static async downloadFile(fileID,userID){
-        if(!fileID || isNaN(fileID)) return null;
+    // Retorna o caminho completo do arquivo para download
+    static async downloadFile(fileID, userID) {
+        if (!fileID || isNaN(fileID)) return null;
 
         const result = await db.get(
             `SELECT path FROM archives 
             WHERE id = ? AND user_id = ?`,
-            [fileID,userID]
+            [fileID, userID]
         );
 
-        if(!result) return null;
-        
-        return path.resolve(__dirname,"..",result.path);
-    }
+        if (!result) return null;
 
+        return path.resolve(__dirname, "..", result.path);
+    }
+    // Lista todos os usuários cadastrados
     static async allUsers() {
         return await db.all(
             `SELECT id, name, last_name, email, role, status, tokens
@@ -78,7 +77,7 @@ class Home {
              ORDER BY id DESC`
         );
     }
-
+    // Altera o status de um usuário comum
     static async changeStatusUser(id, status) {
         if (!id || isNaN(id)) return null;
 
@@ -90,7 +89,7 @@ class Home {
 
         return result.changes > 0;
     }
-
+    // Remove um usuário comum do sistema
     static async deleteUser(id) {
         if (!id || isNaN(id)) return null;
 
@@ -98,7 +97,7 @@ class Home {
             `DELETE FROM users
             WHERE id = ? AND role != 'admin'`,
             [id]
-        )
+        );
 
         return result.changes > 0;
     }
